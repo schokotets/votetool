@@ -34,7 +34,7 @@ let data = {
 }
 
 const s = serve({ port: 8083 });
-console.log("http://localhost:8083/");
+console.log("listening on :8083");
 for await (const req of s) {
   if(req.url == "/vote") {
     let body = await renderFile("./vote.html", data)

@@ -10,9 +10,19 @@
 	<h1>Abimotto-Abstimmung</h1>
 	<h2>Ergebnisse</h2>
 
-	{{#options}}
-	<span class="option">{{name}}: {{votes}}</span>
-	<br>
-	{{/options}}
+	<table>
+		<thead>
+			<th>Option</th>
+			<th>Stimmen</th>
+		</thead>
+		<tbody>
+			{{#options}}
+			<tr>
+				<td>{{name}}</td>
+				<td>{{votes}}</td>
+			</tr>
+			{{/options}}
+		</tbody>
+	</table>
 </body>
 </html>

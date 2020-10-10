@@ -1,4 +1,4 @@
-import { multiParserV2, FormV2, FormFileV2 } from "https://deno.land/x/multiparser@v2.0.1/mod.ts"
+import { multiParserV2 } from "https://deno.land/x/multiparser@v2.0.1/mod.ts"
 
 import { serve, ServerRequest } from "https://deno.land/std@0.61.0/http/server.ts";
 import { serveFile } from "https://deno.land/std@0.61.0/http/file_server.ts";
@@ -61,7 +61,6 @@ for await (const req of s) {
     }
 
     const form = await multiParserV2(req)
-    console.log(JSON.stringify(form))
     if (form) {
       if (!form.fields["consent"]) {
         req.respond({ status: 406, body: "Zustimmung nicht gegeben.\nNavigiere bitte zurueck versuche es erneut." })
@@ -76,7 +75,6 @@ for await (const req of s) {
       })
 
       let amount = votes.length
-      console.log(`${amount} checkboxes`)
       if (amount > 5) {
         req.respond({ status: 400, body: `Zu viele Optionen ausgewaehlt (${amount} statt 5 erlaubte).\nNavigiere bitte zurueck und versuche es erneut.` })
         continue
@@ -88,6 +86,8 @@ for await (const req of s) {
         }
         return item
       })
+
+      console.log(`${new Date().toISOString()}: successful vote submission`)
 
       headers.set("Set-Cookie", "voted-abimotto=true");
       headers.set("Location", "/results")

@@ -38,6 +38,12 @@ for await (const req of s) {
   } else if(req.url == "/submit") {
     let headers = new Headers()
 
+    let cookies = getCookies(req)
+    if ("voted-abimotto" in cookies) {
+      req.respond({ status: 401, body: "Bereits abgestimmt.\nSchau die die Ergebnisse an." })
+      continue
+    }
+
     console.log(JSON.stringify(req.conn.remoteAddr))
 
     const form = await multiParserV2(req)
@@ -69,6 +75,7 @@ for await (const req of s) {
         return item
       })
 
+      headers.set("Set-Cookie", "voted-abimotto=true");
       headers.set("Location", "/results")
       req.respond({ status: 302, headers })
     } else {

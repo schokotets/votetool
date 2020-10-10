@@ -55,6 +55,13 @@ for await (const req of s) {
         }
       })
 
+      let amount = votes.length
+      console.log(`${amount} checkboxes`)
+      if (amount > 5) {
+        req.respond({ status: 400, body: `Zu viele Optionen ausgewaehlt (${amount} statt 5 erlaubte).\nNavigiere bitte zurueck und versuche es erneut.` })
+        continue
+      }
+
       data.options = data.options.map(item => {
         if (item.id in votes) {
           item.votes += 1

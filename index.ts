@@ -1,11 +1,11 @@
-import { multiParserV2, FormV2, FormFileV2 } from 'https://deno.land/x/multiparser@v2.0.1/mod.ts'
+import { multiParserV2, FormV2, FormFileV2 } from "https://deno.land/x/multiparser@v2.0.1/mod.ts"
 
-import { serve, ServerRequest } from 'https://deno.land/std@0.61.0/http/server.ts';
+import { serve, ServerRequest } from "https://deno.land/std@0.61.0/http/server.ts";
 import { serveFile } from "https://deno.land/std@0.61.0/http/file_server.ts";
 import { getCookies } from "https://deno.land/std@0.61.0/http/cookie.ts";
 import { readLines } from "https://deno.land/std@0.61.0/io/bufio.ts";
 
-import { renderFile } from 'https://deno.land/x/mustache/mod.ts';
+import { renderFile } from "https://deno.land/x/mustache/mod.ts";
 
 async function serveF(req: ServerRequest, name: string) {
   const content = await serveFile(req,  `${Deno.cwd()}/${name}`)
@@ -14,25 +14,25 @@ async function serveF(req: ServerRequest, name: string) {
 
 let data = {
   options: [
-    {id: 0, name: 'funky kids', votes: 4},
-    {id: 1, name: 'no kids', votes: 3},
-    {id: 2, name: 'super kids', votes: 1},
-    {id: 3, name: 'funny kids', votes: 0},
-    {id: 4, name: 'dorky kids', votes: 7},
-    {id: 5, name: 'nerdy kids', votes: 4},
-    {id: 6, name: 'kind kids', votes: 7},
-    {id: 7, name: 'great kids', votes: 6},
-    {id: 8, name: 'school kids', votes: 1},
-    {id: 9, name: 'cool kids', votes: 1},
-    {id: 10, name: 'big dreams', votes: 2}
+    {id: 0, name: "funky kids", votes: 4},
+    {id: 1, name: "no kids", votes: 3},
+    {id: 2, name: "super kids", votes: 1},
+    {id: 3, name: "funny kids", votes: 0},
+    {id: 4, name: "dorky kids", votes: 7},
+    {id: 5, name: "nerdy kids", votes: 4},
+    {id: 6, name: "kind kids", votes: 7},
+    {id: 7, name: "great kids", votes: 6},
+    {id: 8, name: "school kids", votes: 1},
+    {id: 9, name: "cool kids", votes: 1},
+    {id: 10, name: "big dreams", votes: 2}
   ]
 }
 
 const s = serve({ port: 8083 });
-console.log('http://localhost:8083/');
+console.log("http://localhost:8083/");
 for await (const req of s) {
   if(req.url == "/vote") {
-    let body = await renderFile('./vote.html', data)
+    let body = await renderFile("./vote.html", data)
     req.respond({ body: body });
 
   } else if(req.url == "/submit") {
@@ -50,7 +50,7 @@ for await (const req of s) {
 
       let votes: string[] = []
       Object.keys(form.fields).forEach(fieldkey => {
-        if (fieldkey != 'consent' && form.fields[fieldkey].startsWith('on')) {
+        if (fieldkey != "consent" && form.fields[fieldkey].startsWith("on")) {
           votes.push(fieldkey)
         }
       })
@@ -77,7 +77,7 @@ for await (const req of s) {
 
   } else if(req.url == "/results") {
     let sorteddata = {options:data.options.sort((a,b) => (b.votes - a.votes))}
-    let body = await renderFile('./results.html', data)
+    let body = await renderFile("./results.html", data)
     req.respond({ body: body });
 
   } else if(req.url == "/") {

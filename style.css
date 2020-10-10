@@ -8,6 +8,7 @@ input[type=checkbox], input[type=submit] {
 
 table {
   border-collapse: collapse;
+  margin-top: 1em;
 }
 
 table td, table th {

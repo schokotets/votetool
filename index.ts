@@ -45,7 +45,7 @@ for await (const req of s) {
 
     let cookies = getCookies(req)
     if ("voted-abimotto" in cookies) {
-      req.respond({ status: 401, body: "Bereits abgestimmt.\nSchau die die Ergebnisse an." })
+      req.respond({ status: 401, body: "Bereits abgestimmt.\nSchau dir die Ergebnisse an." })
       continue
     }
 
@@ -53,7 +53,7 @@ for await (const req of s) {
       const ip = req.conn.remoteAddr.hostname
       const hashedip = hash.digest(encode(ip)).hex()
       if (iphashes.includes(hashedip)) {
-        req.respond({ status: 401, body: "Bereits abgestimmt.\nSchau die die Ergebnisse an." })
+        req.respond({ status: 401, body: "Bereits abgestimmt.\nSchau dir die Ergebnisse an." })
         continue
       } else {
         iphashes.push(hashedip)

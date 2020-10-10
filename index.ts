@@ -1,0 +1,87 @@
+import { multiParserV2, FormV2, FormFileV2 } from 'https://deno.land/x/multiparser@v2.0.1/mod.ts'
+
+import { serve, ServerRequest } from 'https://deno.land/std@0.61.0/http/server.ts';
+import { serveFile } from "https://deno.land/std@0.61.0/http/file_server.ts";
+import { getCookies } from "https://deno.land/std@0.61.0/http/cookie.ts";
+import { readLines } from "https://deno.land/std@0.61.0/io/bufio.ts";
+
+import { renderFile } from 'https://deno.land/x/mustache/mod.ts';
+
+async function serveF(req: ServerRequest, name: string) {
+  const content = await serveFile(req,  `${Deno.cwd()}/${name}`)
+  req.respond(content)
+}
+
+let data = {
+  options: [
+    {id: 0, name: 'funky kids', votes: 4},
+    {id: 1, name: 'no kids', votes: 3},
+    {id: 2, name: 'super kids', votes: 1},
+    {id: 3, name: 'funny kids', votes: 0},
+    {id: 4, name: 'dorky kids', votes: 7},
+    {id: 5, name: 'nerdy kids', votes: 4},
+    {id: 6, name: 'kind kids', votes: 7},
+    {id: 7, name: 'great kids', votes: 6},
+    {id: 8, name: 'school kids', votes: 1},
+    {id: 9, name: 'cool kids', votes: 1},
+    {id: 10, name: 'big dreams', votes: 2}
+  ]
+}
+
+const s = serve({ port: 8083 });
+console.log('http://localhost:8083/');
+for await (const req of s) {
+  if(req.url == "/vote") {
+    let body = await renderFile('./vote.html', data)
+    req.respond({ body: body });
+
+  } else if(req.url == "/submit") {
+    let headers = new Headers()
+
+    console.log(JSON.stringify(req.conn.remoteAddr))
+
+    const form = await multiParserV2(req)
+    console.log(JSON.stringify(form))
+    if (form) {
+      if (!form.fields["consent"]) {
+        req.respond({ status: 406, body: "Zustimmung nicht gegeben.\nNavigiere bitte zurueck versuche es erneut." })
+        continue
+      }
+
+      let votes: string[] = []
+      Object.keys(form.fields).forEach(fieldkey => {
+        if (fieldkey != 'consent' && form.fields[fieldkey].startsWith('on')) {
+          votes.push(fieldkey)
+        }
+      })
+
+      data.options = data.options.map(item => {
+        if (item.id in votes) {
+          item.votes += 1
+        }
+        return item
+      })
+
+      headers.set("Location", "/results")
+      req.respond({ status: 302, headers })
+    } else {
+      req.respond({ status: 400, body: "Keine Formulardaten.\nNavigiere bitte zurueck und versuche es erneut." })
+    }
+
+  } else if(req.url == "/results") {
+    let sorteddata = {options:data.options.sort((a,b) => (b.votes - a.votes))}
+    let body = await renderFile('./results.html', data)
+    req.respond({ body: body });
+
+  } else if(req.url == "/") {
+    let headers = new Headers()
+    headers.set("Location", "/results")
+    req.respond({ status: 302, headers })
+
+  } else if(req.url == "/style.css") {
+    serveF(req, "style.css")
+
+  } else {
+    req.respond({ body: "404 Not found\n" });
+  }
+}

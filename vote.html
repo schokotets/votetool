@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+	<meta charset="UTF-8">
+	<title>Lehrerzitate</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="style.css" media="all">
+</head>
+<body>
+	<h1>Abimotto-Abstimmung</h1>
+	<p>Maximal 5 auswählbar</p>
+	<form enctype="multipart/form-data" method="post" action="/submit">
+		{{#options}}
+		<input name="{{id}}" type="checkbox">
+		<span class="label">{{name}}</span>
+		<br>
+		{{/options}}
+		<br>
+		<input name="consent" type="checkbox" required>
+		<span class="label">Ich erlaube, dass, um Mehrfachantworten zu vermeiden, meine IP-Adresse anonymisiert gespeichert wird und dass beim Absenden ein Cookie (mit welchem ich nicht identifiziert werden kann) angelegt wird.</span>
+		<br>
+		<br>
+		<input type="submit" value="Einsenden">
+	</form>
+</body>
+</html>

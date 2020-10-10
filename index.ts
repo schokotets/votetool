@@ -19,22 +19,6 @@ async function serveF(req: ServerRequest, name: string) {
 
 let iphashes: string[] = []
 
-let data = {
-  options: [
-    {id: 0, name: "funky kids", votes: 4},
-    {id: 1, name: "no kids", votes: 3},
-    {id: 2, name: "super kids", votes: 1},
-    {id: 3, name: "funny kids", votes: 0},
-    {id: 4, name: "dorky kids", votes: 7},
-    {id: 5, name: "nerdy kids", votes: 4},
-    {id: 6, name: "kind kids", votes: 7},
-    {id: 7, name: "great kids", votes: 6},
-    {id: 8, name: "school kids", votes: 1},
-    {id: 9, name: "cool kids", votes: 1},
-    {id: 10, name: "big dreams", votes: 2}
-  ]
-}
-
 await db.connect()
 await db.initialize()
 

@@ -49,14 +49,13 @@ for await (const req of s) {
       continue
     }
 
+    let hashedip
     if(req.conn.remoteAddr.transport == "tcp") {
       const ip = req.conn.remoteAddr.hostname
-      const hashedip = hash.digest(encode(ip)).hex()
+      hashedip = hash.digest(encode(ip)).hex()
       if (iphashes.includes(hashedip)) {
         req.respond({ status: 401, body: "Bereits abgestimmt.\nSchau dir die Ergebnisse an." })
         continue
-      } else {
-        iphashes.push(hashedip)
       }
     }
 
@@ -89,6 +88,7 @@ for await (const req of s) {
 
       console.log(`${new Date().toISOString()}: successful vote submission`)
 
+      iphashes.push(hashedip)
       headers.set("Set-Cookie", "voted-abimotto=true");
       headers.set("Location", "/results")
       req.respond({ status: 302, headers })

@@ -4,13 +4,18 @@ import { serve, ServerRequest } from "https://deno.land/std@0.61.0/http/server.t
 import { serveFile } from "https://deno.land/std@0.61.0/http/file_server.ts";
 import { getCookies } from "https://deno.land/std@0.61.0/http/cookie.ts";
 import { readLines } from "https://deno.land/std@0.61.0/io/bufio.ts";
+import { Hash, encode } from "https://deno.land/x/checksum@1.2.0/mod.ts";
 
 import { renderFile } from "https://deno.land/x/mustache/mod.ts";
+
+const hash = new Hash("md5")
 
 async function serveF(req: ServerRequest, name: string) {
   const content = await serveFile(req,  `${Deno.cwd()}/${name}`)
   req.respond(content)
 }
+
+let iphashes: string[] = []
 
 let data = {
   options: [
@@ -44,7 +49,16 @@ for await (const req of s) {
       continue
     }
 
-    console.log(JSON.stringify(req.conn.remoteAddr))
+    if(req.conn.remoteAddr.transport == "tcp") {
+      const ip = req.conn.remoteAddr.hostname
+      const hashedip = hash.digest(encode(ip)).hex()
+      if (iphashes.includes(hashedip)) {
+        req.respond({ status: 401, body: "Bereits abgestimmt.\nSchau die die Ergebnisse an." })
+        continue
+      } else {
+        iphashes.push(hashedip)
+      }
+    }
 
     const form = await multiParserV2(req)
     console.log(JSON.stringify(form))

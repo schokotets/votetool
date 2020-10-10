@@ -2,8 +2,9 @@ body {
   margin: 0.5em 1.5em;
 }
 
-input[type=checkbox], input[type=submit] {
+input[type=checkbox], input[type=checkbox] + label, input[type=submit] {
   margin: 0.5em 0;
+  cursor: pointer;
 }
 
 table {

@@ -74,6 +74,10 @@ for await (const req of s) {
       })
 
       let amount = votes.length
+      if (amount == 0) {
+        req.respond({ status: 400, body: `Gar keine Optionen ausgewaehlt.\nNavigiere bitte zurueck und versuche es erneut.` })
+        continue
+      }
       if (amount > 5) {
         req.respond({ status: 400, body: `Zu viele Optionen ausgewaehlt (${amount} statt 5 erlaubte).\nNavigiere bitte zurueck und versuche es erneut.` })
         continue

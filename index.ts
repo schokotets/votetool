@@ -8,6 +8,8 @@ import { Hash, encode } from "https://deno.land/x/checksum@1.2.0/mod.ts";
 
 import { renderFile } from "https://deno.land/x/mustache/mod.ts";
 
+import * as db from "./database.ts"
+
 const hash = new Hash("md5")
 
 async function serveF(req: ServerRequest, name: string) {
@@ -33,10 +35,14 @@ let data = {
   ]
 }
 
+await db.connect()
+await db.initialize()
+
 const s = serve({ port: 8083 });
 console.log("listening on :8083");
 for await (const req of s) {
   if(req.url == "/vote") {
+    let data = {options: await db.getVotes()}
     let body = await renderFile("./vote.html", data)
     req.respond({ body: body });
 
@@ -83,12 +89,12 @@ for await (const req of s) {
         continue
       }
 
-      data.options = data.options.map(item => {
-        if (item.id in votes) {
-          item.votes += 1
-        }
-        return item
-      })
+      let success = await db.castVotes(votes)
+
+      if(!success) {
+        req.respond({ status: 500, body: "Interner Fehler beim Speichern der Stimmen.\nKontaktiere bitte den Seitenbetreiber.\nVersuche, zurück zu navigieren und es erneut zu versuchen." })
+        continue
+      }
 
       console.log(`${new Date().toISOString()}: successful vote submission`)
 
@@ -101,7 +107,7 @@ for await (const req of s) {
     }
 
   } else if(req.url == "/results") {
-    let sorteddata = {options:data.options.sort((a,b) => (b.votes - a.votes))}
+    let data = {options: await db.getSortedVotes()}
     let body = await renderFile("./results.html", data)
     req.respond({ body: body });
 

@@ -17,8 +17,6 @@ async function serveF(req: ServerRequest, name: string) {
   req.respond(content)
 }
 
-let iphashes: string[] = []
-
 await db.connect()
 await db.initialize()
 
@@ -43,7 +41,7 @@ for await (const req of s) {
     if(req.conn.remoteAddr.transport == "tcp") {
       const ip = req.conn.remoteAddr.hostname
       hashedip = hash.digest(encode(ip)).hex()
-      if (iphashes.includes(hashedip)) {
+      if (await db.hasVoted(hashedip)) {
         req.respond({ status: 401, body: "Bereits abgestimmt.\nSchau dir die Ergebnisse an." })
         continue
       }
@@ -82,7 +80,7 @@ for await (const req of s) {
 
       console.log(`${new Date().toISOString()}: successful vote submission`)
 
-      iphashes.push(hashedip)
+      await db.noteVoted(hashedip)
       headers.set("Set-Cookie", "voted-abimotto=true");
       headers.set("Location", "/results")
       req.respond({ status: 302, headers })

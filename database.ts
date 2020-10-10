@@ -68,6 +68,22 @@ export async function castVotes(ids: string[]): boolean {
   return result
 }
 
+export async function hasVoted(hash: string): boolean {
+  const client: PoolClient = await dbPool.connect().catch(fail("cannot connect to database"))
+  const result = await client.query(`SELECT iphash FROM voters WHERE iphash = '${hash}';`)
+    .catch(fail("cannot check if hash has voted", false))
+  let res = result.rowCount > 0
+  client.release()
+  return res
+}
+
+export async function noteVoted(hash: string) {
+  const client: PoolClient = await dbPool.connect().catch(fail("cannot connect to database"))
+  const result = await client.query(`INSERT INTO voters (iphash, votetime) VALUES ('${hash}', current_timestamp);`)
+    .catch(fail("cannot note that hash has voted", false))
+  client.release()
+}
+
 export async function close() {
   return dbPool.end()
 }

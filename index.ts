@@ -1,14 +1,15 @@
 const fs = require("fs")
+const crypt = require("crypto")
 
 const Koa = require("koa")
 const app = new Koa()
 
-app.use(require('koa-static')("./static", { maxage: 86400000 /*1 day*/ }))
-app.use(require('koa-bodyparser')())
+app.use(require("koa-static")("./static", { maxage: 86400000 /*1 day*/ }))
+app.use(require("koa-bodyparser")())
 
 const Mustache = require("mustache")
 
-const db = require("./db")
+const db = require("./database")
 
 
 
@@ -28,7 +29,9 @@ app.use(async ctx => {
       return
     }
 
-    const hashedip = hash.digest(encode(ctx.ip)).hex()
+    const hash = crypt.createHash("sha256")
+    hash.update(ctx.ip)
+    const hashedip = hash.digest("hex")
     if (await db.hasVoted(hashedip)) {
       ctx.throw(401, "Bereits abgestimmt.\nSchau dir die Ergebnisse an.")
       return

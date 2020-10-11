@@ -5,7 +5,7 @@ const Koa = require("koa")
 const app = new Koa()
 
 app.use(require("koa-static")("./static", { maxage: 86400000 /*1 day*/ }))
-app.use(require("koa-bodyparser")())
+app.use(require("multy")({}))
 
 const Mustache = require("mustache")
 
@@ -21,7 +21,7 @@ db.connect().then(db.initialize).then(() => {
 app.use(async ctx => {
   if(ctx.url == "/vote") {
     let data = {options: await db.getVotes()}
-    ctx.body = await Mustache.render(fs.readFileSync(__dirname + "vote.html").toString(), data)
+    ctx.body = await Mustache.render(fs.readFileSync(__dirname + "/vote.html").toString(), data)
 
   } else if(ctx.url == "/submit") {
     if (ctx.cookies.get("voted-abimotto")) {
@@ -37,17 +37,17 @@ app.use(async ctx => {
       return
     }
 
-    const form = await ctx.request.body
-    if (form) {
-      console.log(form)
-      if (!form.fields["consent"]) {
+    const formdata = ctx.request.body
+    if (formdata && Object.keys(formdata).length != 0) {
+      console.log(formdata)
+      if (!formdata["consent"]) {
         ctx.throw(406, "Zustimmung nicht gegeben.\nNavigiere bitte zurueck versuche es erneut.")
         return
       }
 
       let votes: string[] = []
-      Object.keys(form.fields).forEach(fieldkey => {
-        if (fieldkey != "consent" && form.fields[fieldkey].startsWith("on")) {
+      Object.keys(formdata).forEach(fieldkey => {
+        if (fieldkey != "consent" && formdata[fieldkey].startsWith("on")) {
           votes.push(fieldkey)
         }
       })
@@ -72,20 +72,20 @@ app.use(async ctx => {
       console.log(`${new Date().toISOString()}: successful vote submission`)
 
       await db.noteVoted(hashedip)
-      ctx.set("Set-Cookie", "voted-abimotto=true");
-      ctx.set("Location", "/results")
-      ctx.throw(302)
+      ctx.cookies.set("voted-abimotto","true");
+      ctx.status = 303
+      ctx.redirect("/results")
     } else {
       ctx.throw(400, "Keine Formulardaten.\nNavigiere bitte zurueck und versuche es erneut.")
     }
 
   } else if(ctx.url == "/results") {
     let data = {options: await db.getSortedVotes()}
-    ctx.body = await Mustache.render(fs.readFileSync(__dirname + "results.html").toString(), data)
+    ctx.body = await Mustache.render(fs.readFileSync(__dirname + "/results.html").toString(), data)
 
   } else if(ctx.url == "/") {
-    ctx.set("Location", "/results")
-    ctx.throw(302)
+    ctx.status = 303
+    ctx.redirect("/results")
 
   } else {
     ctx.throw(404, "404 Not found")

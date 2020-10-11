@@ -1,5 +1,4 @@
-import { Pool } from "https://deno.land/x/postgres@v0.4.5/mod.ts";
-import { PoolClient } from "https://deno.land/x/postgres@v0.4.5/client.ts";
+const pg = require("pg")
 
 function fail(msg: string, kill: boolean = true) {
   return async (error) => {
@@ -7,7 +6,7 @@ function fail(msg: string, kill: boolean = true) {
     console.error(error)
     if(kill) {
       await close().catch(() => {})
-      Deno.exit(1)
+      process.exit(1)
     }
     return false
   }
@@ -15,17 +14,17 @@ function fail(msg: string, kill: boolean = true) {
 
 var dbPool
 export async function connect() {
-  dbPool = new Pool({
+  dbPool = new pg.Pool({
     user: "postgres",
-    password: Deno.env.get("DB_PASSWORD"),
+    password: process.env["DB_PASSWORD"],
     database: "abiball",
-    hostname: Deno.env.get("DB_HOST"),
-    port: parseInt(Deno.env.get("DB_PORT"))
+    hostname: process.env["DB_HOST"],
+    port: parseInt(process.env["DB_PORT"])
   }, 5)
 }
 
 export async function initialize() {
-  const client: PoolClient = await dbPool.connect()
+  const client = await dbPool.connect()
     .catch(fail("cannot connect to database"))
   const result1 = await client.query("CREATE TABLE IF NOT EXISTS votes (" +
     "id serial PRIMARY KEY," +
@@ -39,37 +38,37 @@ export async function initialize() {
 }
 
 export async function getVotes() {
-  const client: PoolClient = await dbPool.connect()
+  const client = await dbPool.connect()
     .catch(fail("cannot connect to database"))
   const result = await client.query("SELECT * FROM votes ORDER BY name ASC;")
     .catch(fail("cannot select votes"))
   if (!result) return null
-  let res = result.rowsOfObjects()
+  let res = result.rows
   client.release()
   return res
 }
 
 export async function getSortedVotes() {
-  const client: PoolClient = await dbPool.connect().catch(fail("cannot connect to database"))
+  const client = await dbPool.connect().catch(fail("cannot connect to database"))
   const result = await client.query("SELECT * FROM votes ORDER BY votes DESC, name ASC;")
     .catch(fail("cannot select votes (sorted)"))
   if (!result) return null
-  let res = result.rowsOfObjects()
+  let res = result.rows
   client.release()
   return res
 }
 
-export async function castVotes(ids: string[]): boolean {
+export async function castVotes(ids: string[]): Promise<boolean> {
   let safeids = ids.map(id => parseInt(id)).join(",")
-  const client: PoolClient = await dbPool.connect().catch(fail("cannot connect to database"))
+  const client = await dbPool.connect().catch(fail("cannot connect to database"))
   const result = await client.query(`UPDATE votes SET votes = votes + 1 WHERE id IN (${ids});`)
     .then(() => true, fail("cannot register votes", false))
   client.release()
   return result
 }
 
-export async function hasVoted(hash: string): boolean {
-  const client: PoolClient = await dbPool.connect().catch(fail("cannot connect to database"))
+export async function hasVoted(hash: string): Promise<boolean> {
+  const client = await dbPool.connect().catch(fail("cannot connect to database"))
   const result = await client.query(`SELECT iphash FROM voters WHERE iphash = '${hash}';`)
     .catch(fail("cannot check if hash has voted", false))
   let res = result.rowCount > 0
@@ -78,7 +77,7 @@ export async function hasVoted(hash: string): boolean {
 }
 
 export async function noteVoted(hash: string) {
-  const client: PoolClient = await dbPool.connect().catch(fail("cannot connect to database"))
+  const client = await dbPool.connect().catch(fail("cannot connect to database"))
   const result = await client.query(`INSERT INTO voters (iphash, votetime) VALUES ('${hash}', current_timestamp);`)
     .catch(fail("cannot note that hash has voted", false))
   client.release()

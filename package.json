@@ -1,0 +1,13 @@
+{
+  "name": "votetool",
+  "version": "0.1.0",
+  "description": "a webapp to cast multiple-choice votes with ip- and cookie-based duplication",
+  "main": "index.ts",
+  "repository": "https://github.com/schokotets/votetool.git",
+  "author": "schokotets <moritzleni@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "koa": "^2.13.0",
+    "koa-static": "^5.0.0"
+  }
+}

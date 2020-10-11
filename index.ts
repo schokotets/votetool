@@ -1,34 +1,20 @@
-import { multiParserV2 } from "https://deno.land/x/multiparser@v2.0.1/mod.ts"
-
-import { serve, ServerRequest } from "https://deno.land/std@0.61.0/http/server.ts";
-import { serveFile } from "https://deno.land/std@0.61.0/http/file_server.ts";
-import { getCookies } from "https://deno.land/std@0.61.0/http/cookie.ts";
-import { readLines } from "https://deno.land/std@0.61.0/io/bufio.ts";
-import { Hash, encode } from "https://deno.land/x/checksum@1.2.0/mod.ts";
-
-import { renderFile } from "https://deno.land/x/mustache/mod.ts";
-
-import * as db from "./database.ts"
-
-const hash = new Hash("md5")
-
-async function serveF(req: ServerRequest, name: string) {
-  const content = await serveFile(req,  `${Deno.cwd()}/${name}`)
-  req.respond(content)
-}
+const Koa = require("koa")
+const app = new Koa();
 
 await db.connect()
 await db.initialize()
 
-const s = serve({ port: 8083 });
+app.use(require('koa-static')("./static", { maxage: 86400000 /*1 day*/ }));
+const s = app.listen(8083);
 console.log("listening on :8083");
-for await (const req of s) {
-  if(req.url == "/vote") {
+
+app.use(async ctx => {
+  if(ctx.url == "/vote") {
     let data = {options: await db.getVotes()}
     let body = await renderFile("./vote.html", data)
     req.respond({ body: body });
 
-  } else if(req.url == "/submit") {
+  } else if(ctx.url == "/submit") {
     let headers = new Headers()
 
     let cookies = getCookies(req)
@@ -88,18 +74,15 @@ for await (const req of s) {
       req.respond({ status: 400, body: "Keine Formulardaten.\nNavigiere bitte zurueck und versuche es erneut." })
     }
 
-  } else if(req.url == "/results") {
+  } else if(ctx.url == "/results") {
     let data = {options: await db.getSortedVotes()}
     let body = await renderFile("./results.html", data)
     req.respond({ body: body });
 
-  } else if(req.url == "/") {
+  } else if(ctx.url == "/") {
     let headers = new Headers()
     headers.set("Location", "/results")
     req.respond({ status: 302, headers })
-
-  } else if(req.url == "/style.css") {
-    serveF(req, "style.css")
 
   } else {
     req.respond({ body: "404 Not found\n" });

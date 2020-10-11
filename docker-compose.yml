@@ -1,0 +1,28 @@
+version: "3.8"
+services:
+  web:
+    build: .
+    image: votetool:latest
+    ports:
+      - "8083:8083"
+    networks:
+      - overlay
+    links:
+      - "database"
+    environment:
+      - DB_HOST=database
+      - DB_PORT=5432
+      - DB_NAME=votetool
+      - DB_USER=postgres
+      - DB_PASSWORD=123password
+  database:
+    image: "postgres"
+    container_name: votetool-db
+    networks:
+      - overlay
+    environment:
+      - POSTGRES_DB=votetool
+      - POSTGRES_PASSWORD=123password
+
+networks:
+  overlay:

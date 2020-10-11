@@ -15,10 +15,10 @@ function fail(msg: string, kill: boolean = true) {
 var dbPool
 export async function connect() {
   dbPool = new pg.Pool({
-    user: "postgres",
+    user: process.env["DB_USER"],
     password: process.env["DB_PASSWORD"],
-    database: "abiball",
-    hostname: process.env["DB_HOST"],
+    database: process.env["DB_NAME"],
+    host: process.env["DB_HOST"],
     port: parseInt(process.env["DB_PORT"])
   }, 5)
 }

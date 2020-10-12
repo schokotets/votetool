@@ -80,7 +80,8 @@ app.use(async ctx => {
     }
 
   } else if(ctx.url == "/results") {
-    let data = {options: await db.getSortedVotes()}
+    let [nvotes, options] = await Promise.all([db.getAmountOfVoters(), db.getSortedVotes()])
+    let data = {nvoters: nvotes==1?"Eine Person hat":nvotes+" Personen haben", options}
     ctx.body = await Mustache.render(fs.readFileSync(__dirname + "/results.html").toString(), data)
 
   } else if(ctx.url == "/") {

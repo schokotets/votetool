@@ -37,6 +37,17 @@ export async function initialize() {
   client.release()
 }
 
+export async function getAmountOfVoters() {
+  const client = await dbPool.connect()
+    .catch(fail("cannot connect to database"))
+  const result = await client.query("SELECT COUNT(*) FROM voters;")
+    .catch(fail("cannot select votes"))
+  if (!result) return null
+  let res = result.rows[0].count
+  client.release()
+  return res
+}
+
 export async function getVotes() {
   const client = await dbPool.connect()
     .catch(fail("cannot connect to database"))

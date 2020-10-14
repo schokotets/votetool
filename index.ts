@@ -3,6 +3,7 @@ const crypt = require("crypto")
 
 const Koa = require("koa")
 const app = new Koa()
+app.proxy = true
 
 app.use(require("koa-static")("./static", { maxage: 86400000 /*1 day*/ }))
 app.use(require("multy")({}))

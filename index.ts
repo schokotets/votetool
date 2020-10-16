@@ -152,6 +152,7 @@ app.use(async ctx => {
     let data = {
       votingname: VOTING_NAME_CAPITALIZED,
       canvote: !outOfDateRange(),
+      votingover: outOfDateRange() === 1,
       datemin: DATE_MIN ? dayjs(DATE_MIN).format(DATE_FORMAT) : undefined,
       datemax: DATE_MAX ? dayjs(DATE_MAX).format(DATE_FORMAT) : undefined,
       nvoters,

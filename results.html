@@ -16,15 +16,13 @@
 
 	{{#if datemin}}
 	{{#if datemax}}
-	<p>Abstimmen {{#if canvote}} ist {{else}} war {{/if}}möglich vom {{datemin}} bis zum {{datemax}}.</p>
+	<p>Abstimmen {{#unless votingover}} ist {{else}} war {{/unless}}möglich vom {{datemin}} bis zum {{datemax}}.</p>
 	{{else}}
-	{{#unless canvote}}
-	<p>Abstimmen möglich ab dem {{datemin}}.</p>
-	{{/unless}}
+	<p>Abstimmen {{#unless votingover}} ist {{else}} war {{/unless}}möglich ab dem {{datemin}}.</p>
 	{{/if}}
 	{{else}}
 	{{#if datemax}}
-	<p>Abstimmen {{#if canvote}} ist {{else}} war {{/if}}möglich bis zum {{datemax}}.</p>
+	<p>Abstimmen {{#unless votingover}} ist {{else}} war {{/unless}}möglich bis zum {{datemax}}.</p>
 	{{/if}}
 	{{/if}}
 

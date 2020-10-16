@@ -9,6 +9,10 @@ app.use(require("koa-static")("./static", { maxage: 86400000 /*1 day*/ }))
 app.use(require("multy")({}))
 
 const Handlebars = require("handlebars")
+const dayjs = require("dayjs")
+require("dayjs/locale/de")
+
+dayjs.locale("de")
 
 const db = require("./database")
 
@@ -41,6 +45,8 @@ app.use(async (ctx, next) => {
 
 const DATE_MIN = process.env["DATE_MIN"]
 const DATE_MAX = process.env["DATE_MAX"]
+const DATE_FORMAT = "D. MMM. YYYY"
+
 function outOfDateRange() {
   let currentDate = new Date().toISOString().substr(0,10)
   if (!DATE_MIN || currentDate >= DATE_MIN) {
@@ -61,7 +67,7 @@ function checkDateRange(ctx) {
     ctx.throw(403, `Abstimmung wieder geschlossen`, {tryagain: false})
   }
   if(rangeinfo == -1) {
-    ctx.throw(403, `Abstimmung noch geschlossen.<br>Sie öffnet am ${DATE_MIN}.`, {tryagain: false})
+    ctx.throw(403, `Abstimmung noch geschlossen.<br>Sie öffnet am ${dayjs(DATE_MIN).format(DATE_FORMAT)}.`, {tryagain: false})
   }
   return true
 }
@@ -71,7 +77,7 @@ app.use(async ctx => {
     checkDateRange(ctx)
 
     let data = {
-      datemax: DATE_MAX,
+      datemax: DATE_MAX ? dayjs(DATE_MAX).format(DATE_FORMAT) : undefined,
       votingname: VOTING_NAME_CAPITALIZED,
       options: await db.getVotes()
     }
@@ -146,8 +152,8 @@ app.use(async ctx => {
     let data = {
       votingname: VOTING_NAME_CAPITALIZED,
       canvote: !outOfDateRange(),
-      datemin: DATE_MIN,
-      datemax: DATE_MAX,
+      datemin: DATE_MIN ? dayjs(DATE_MIN).format(DATE_FORMAT) : undefined,
+      datemax: DATE_MAX ? dayjs(DATE_MAX).format(DATE_FORMAT) : undefined,
       nvoters,
       options
     }

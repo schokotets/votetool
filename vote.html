@@ -9,8 +9,14 @@
 <body>
 	<h1>Abstimmung{{#if votingname}}: {{votingname}}{{/if}}</h1>
 	<h2>Abstimmen</h2>
+
+	{{#if datemax}}
+	<p>Die Abstimmung ist geöffnet bis {{datemax}}.</p>
+	{{/if}}
+
 	<a href="/results">Zu den Ergebnissen</a>
 	<p>Maximal 5 auswählbar</p>
+
 	<form enctype="multipart/form-data" method="post" action="/submit">
 		{{#options}}
 		<input name="{{id}}" id="checkbox-{{id}}" type="checkbox">

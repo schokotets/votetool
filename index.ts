@@ -39,15 +39,47 @@ app.use(async (ctx, next) => {
   }
 })
 
+const DATE_MIN = process.env["DATE_MIN"]
+const DATE_MAX = process.env["DATE_MAX"]
+function outOfDateRange() {
+  let currentDate = new Date().toISOString().substr(0,10)
+  if (!DATE_MIN || currentDate >= DATE_MIN) {
+    if (!DATE_MAX || currentDate <= DATE_MAX) {
+      return false
+    } else {
+      return 1 //past DATE_MAX
+    }
+  } else {
+    return -1 //before DATE_MIN
+  }
+  return true
+}
+
+function checkDateRange(ctx) {
+  let rangeinfo = outOfDateRange()
+  if(rangeinfo === 1) { //to not confuse with true
+    ctx.throw(403, `Abstimmung wieder geschlossen`, {tryagain: false})
+  }
+  if(rangeinfo == -1) {
+    ctx.throw(403, `Abstimmung noch geschlossen.<br>Sie öffnet am ${DATE_MIN}.`, {tryagain: false})
+  }
+  return true
+}
+
 app.use(async ctx => {
   if(ctx.url == "/vote") {
+    checkDateRange(ctx)
+
     let data = {
+      datemax: DATE_MAX,
       votingname: VOTING_NAME_CAPITALIZED,
       options: await db.getVotes()
     }
     ctx.body = await Handlebars.compile(fs.readFileSync(__dirname + "/vote.html").toString())(data)
 
   } else if(ctx.url == "/submit") {
+    checkDateRange(ctx)
+
     if (ctx.cookies.get(COOKIE_NAME)) {
       console.log(`${new Date().toISOString()}: error: already voted (cookie)`)
       ctx.throw(401, "Bereits abgestimmt", {tryagain: false})
@@ -113,6 +145,9 @@ app.use(async ctx => {
     let [nvoters, options] = await Promise.all([db.getAmountOfVoters(), db.getSortedVotes()])
     let data = {
       votingname: VOTING_NAME_CAPITALIZED,
+      canvote: !outOfDateRange(),
+      datemin: DATE_MIN,
+      datemax: DATE_MAX,
       nvoters,
       options
     }

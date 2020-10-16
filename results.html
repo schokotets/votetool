@@ -10,7 +10,23 @@
 	<h1>Abstimmung{{#if votingname}}: {{votingname}}{{/if}}</h1>
 	<h2>Ergebnisse</h2>
 
+	{{#if canvote}}
 	<a href="/vote">Zum Abstimmen</a>
+	{{/if}}
+
+	{{#if datemin}}
+	{{#if datemax}}
+	<p>Abstimmen {{#if canvote}} ist {{else}} war {{/if}}möglich vom {{datemin}} bis zum {{datemax}}.</p>
+	{{else}}
+	{{#unless canvote}}
+	<p>Abstimmen möglich ab dem {{datemin}}.</p>
+	{{/unless}}
+	{{/if}}
+	{{else}}
+	{{#if datemax}}
+	<p>Abstimmen {{#if canvote}} ist {{else}} war {{/if}}möglich bis zum {{datemax}}.</p>
+	{{/if}}
+	{{/if}}
 
 	{{#ifeq nvoters 1}}
 	<p>Eine Person hat abgestimmt.</p>

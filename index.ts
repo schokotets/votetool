@@ -20,6 +20,20 @@ db.connect().then(db.initialize).then(() => {
   console.log("listening on :8083")
 })
 
+
+app.use(async (ctx, next) => {
+  try {
+    await next();
+  } catch (err) {
+    const data = {
+      votingname: VOTING_NAME ? (VOTING_NAME[0].toUpperCase() + VOTING_NAME.substr(1)) : "",
+      message: err.message,
+      tryagain: err.tryagain
+    }
+    ctx.body = await Handlebars.compile(fs.readFileSync(__dirname + "/error.html").toString())(data)
+  }
+})
+
 app.use(async ctx => {
   if(ctx.url == "/vote") {
     let data = {
@@ -30,7 +44,7 @@ app.use(async ctx => {
 
   } else if(ctx.url == "/submit") {
     if (ctx.cookies.get(COOKIE_NAME)) {
-      ctx.throw(401, "Bereits abgestimmt.\nSchau dir die Ergebnisse an.")
+      ctx.throw(401, "Bereits abgestimmt", {tryagain: false})
       return
     }
 
@@ -38,7 +52,7 @@ app.use(async ctx => {
     hash.update(ctx.ip)
     const hashedip = hash.digest("hex")
     if (await db.hasVoted(hashedip)) {
-      ctx.throw(401, "Bereits abgestimmt.\nSchau dir die Ergebnisse an.")
+      ctx.throw(401, "Bereits abgestimmt", {tryagain: false})
       return
     }
 
@@ -46,7 +60,7 @@ app.use(async ctx => {
     if (formdata && Object.keys(formdata).length != 0) {
       console.log(formdata)
       if (!formdata["consent"]) {
-        ctx.throw(406, "Zustimmung nicht gegeben.\nNavigiere bitte zurueck versuche es erneut.")
+        ctx.throw(406, "Zustimmung nicht gegeben", {tryagain: true})
         return
       }
 
@@ -59,18 +73,18 @@ app.use(async ctx => {
 
       let amount = votes.length
       if (amount == 0) {
-        ctx.throw(400, `Gar keine Optionen ausgewaehlt.\nNavigiere bitte zurueck und versuche es erneut.`)
+        ctx.throw(400, "Gar keine Optionen ausgewählt", {tryagain: true})
         return
       }
       if (amount > 5) {
-        ctx.throw(400, `Zu viele Optionen ausgewaehlt (${amount} statt 5 erlaubte).\nNavigiere bitte zurueck und versuche es erneut.`)
+        ctx.throw(400, `Zu viele Optionen ausgewählt: ${amount} statt 5 erlaubte`, {tryagain: true})
         return
       }
 
       let success = await db.castVotes(votes)
 
       if(!success) {
-        ctx.throw(500, "Interner Fehler beim Speichern der Stimmen.\nKontaktiere bitte den Seitenbetreiber.\nVersuche, zurück zu navigieren und es erneut zu versuchen.")
+        ctx.throw(500, "Interner Fehler beim Speichern der Stimmen,\nkontaktiere bitte den Seitenbetreiber.", {tryagain: true})
         return
       }
 
@@ -81,7 +95,7 @@ app.use(async ctx => {
       ctx.status = 303
       ctx.redirect("/results")
     } else {
-      ctx.throw(400, "Keine Formulardaten.\nNavigiere bitte zurueck und versuche es erneut.")
+      ctx.throw(400, "Keine Formulardaten"), {tryagain: true}
     }
 
   } else if(ctx.url == "/results") {

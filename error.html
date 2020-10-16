@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+	<meta charset="UTF-8">
+	<title>Fehler - {{#if votingname}}{{votingname}}-{{/if}}Abstimmung</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="style.css" media="all">
+</head>
+<body>
+	<h1>Abstimmung{{#if votingname}}: {{votingname}}{{/if}}</h1>
+	<h2>Fehler</h2>
+
+	<code>{{message}}</code>
+	<br>
+	<br>
+
+	{{#if tryagain}}
+	Erneut versuchen: <a href="javascript: history.back()">zurück gehen</a>
+	{{else}}
+	<a href="/results">Zu den Ergebnissen</a>
+	{{/if}}
+</body>
+</html>

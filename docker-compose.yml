@@ -17,6 +17,7 @@ services:
       - DB_NAME=votetool
       - DB_USER=postgres
       - DB_PASSWORD=123password
+      - VOTING_NAME=
   database:
     image: postgres:11.6-alpine
     container_name: votetool-db

@@ -12,7 +12,7 @@ const Mustache = require("mustache")
 
 const db = require("./database")
 
-
+const COOKIE_NAME = process.env["VOTING_NAME"] ? `hasvoted-${process.env["VOTING_NAME"]}` || "hasvoted"
 
 db.connect().then(db.initialize).then(() => {
   app.listen(8083)
@@ -25,7 +25,7 @@ app.use(async ctx => {
     ctx.body = await Mustache.render(fs.readFileSync(__dirname + "/vote.html").toString(), data)
 
   } else if(ctx.url == "/submit") {
-    if (ctx.cookies.get("voted-abimotto")) {
+    if (ctx.cookies.get(COOKIE_NAME)) {
       ctx.throw(401, "Bereits abgestimmt.\nSchau dir die Ergebnisse an.")
       return
     }
@@ -73,7 +73,7 @@ app.use(async ctx => {
       console.log(`${new Date().toISOString()}: successful vote submission`)
 
       await db.noteVoted(hashedip)
-      ctx.cookies.set("voted-abimotto","true");
+      ctx.cookies.set(COOKIE_NAME,"true");
       ctx.status = 303
       ctx.redirect("/results")
     } else {

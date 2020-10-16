@@ -12,7 +12,11 @@
 
 	<a href="/vote">Zum Abstimmen</a>
 
-	<p>{{nvoters}} abgestimmt</p>
+	{{#ifeq nvoters 1}}
+	<p>Eine Person hat abgestimmt.</p>
+	{{else}}
+	<p>{{nvoters}} Personen haben abgestimmt.</p>
+	{{/ifeq}}
 
 	<table>
 		<thead>

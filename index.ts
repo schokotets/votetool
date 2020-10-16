@@ -20,6 +20,10 @@ db.connect().then(db.initialize).then(() => {
   console.log("listening on :8083")
 })
 
+Handlebars.registerHelper("ifeq", function (a, b, options) {
+      if (a == b) { return options.fn(this) }
+      return options.inverse(this)
+})
 
 app.use(async (ctx, next) => {
   try {
@@ -105,10 +109,10 @@ app.use(async ctx => {
     }
 
   } else if(ctx.url == "/results") {
-    let [nvotes, options] = await Promise.all([db.getAmountOfVoters(), db.getSortedVotes()])
+    let [nvoters, options] = await Promise.all([db.getAmountOfVoters(), db.getSortedVotes()])
     let data = {
       votingname: VOTING_NAME ? (VOTING_NAME[0].toUpperCase() + VOTING_NAME.substr(1)) : "",
-      nvoters: nvotes==1?"Eine Person hat":nvotes+" Personen haben",
+      nvoters,
       options
     }
     ctx.body = await Handlebars.compile(fs.readFileSync(__dirname + "/results.html").toString())(data)

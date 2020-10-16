@@ -132,7 +132,7 @@ app.use(async ctx => {
 
       if(!success) {
         console.log(`${new Date().toISOString()}: error: failed to cast vote`)
-        ctx.throw(500, "Interner Fehler beim Speichern der Stimmen,\nkontaktiere bitte den Seitenbetreiber.", {tryagain: true})
+        ctx.throw(500, "Interner Fehler beim Speichern der Stimmen,<br>kontaktiere bitte den Seitenbetreiber.", {tryagain: true})
         return
       }
 

@@ -44,6 +44,7 @@ app.use(async ctx => {
 
   } else if(ctx.url == "/submit") {
     if (ctx.cookies.get(COOKIE_NAME)) {
+      console.log(`${new Date().toISOString()}: error: already voted (cookie)`)
       ctx.throw(401, "Bereits abgestimmt", {tryagain: false})
       return
     }
@@ -52,14 +53,15 @@ app.use(async ctx => {
     hash.update(ctx.ip)
     const hashedip = hash.digest("hex")
     if (await db.hasVoted(hashedip)) {
+      console.log(`${new Date().toISOString()}: error: already voted (ip)`)
       ctx.throw(401, "Bereits abgestimmt", {tryagain: false})
       return
     }
 
     const formdata = ctx.request.body
     if (formdata && Object.keys(formdata).length != 0) {
-      console.log(formdata)
       if (!formdata["consent"]) {
+        console.log(`${new Date().toISOString()}: error: consent not given`)
         ctx.throw(406, "Zustimmung nicht gegeben", {tryagain: true})
         return
       }
@@ -73,10 +75,12 @@ app.use(async ctx => {
 
       let amount = votes.length
       if (amount == 0) {
+        console.log(`${new Date().toISOString()}: error: no options selected`)
         ctx.throw(400, "Gar keine Optionen ausgewählt", {tryagain: true})
         return
       }
       if (amount > 5) {
+        console.log(`${new Date().toISOString()}: error: too many options selected`)
         ctx.throw(400, `Zu viele Optionen ausgewählt: ${amount} statt 5 erlaubte`, {tryagain: true})
         return
       }
@@ -84,6 +88,7 @@ app.use(async ctx => {
       let success = await db.castVotes(votes)
 
       if(!success) {
+        console.log(`${new Date().toISOString()}: error: failed to cast vote`)
         ctx.throw(500, "Interner Fehler beim Speichern der Stimmen,\nkontaktiere bitte den Seitenbetreiber.", {tryagain: true})
         return
       }
@@ -95,6 +100,7 @@ app.use(async ctx => {
       ctx.status = 303
       ctx.redirect("/results")
     } else {
+      console.log(`${new Date().toISOString()}: error: no form data`)
       ctx.throw(400, "Keine Formulardaten"), {tryagain: true}
     }
 

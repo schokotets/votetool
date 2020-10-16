@@ -14,6 +14,7 @@ function fail(msg: string, kill: boolean = true) {
 
 var dbPool
 export async function connect() {
+  console.log("connecting to database...")
   dbPool = new pg.Pool({
     user: process.env["DB_USER"],
     password: process.env["DB_PASSWORD"],
@@ -26,6 +27,7 @@ export async function connect() {
 const TABLE_PREFIX = process.env["VOTING_NAME"] ? `${process.env["VOTING_NAME"]}_` : ""
 
 export async function initialize() {
+  console.log("initializing database with tables...")
   const client = await dbPool.connect()
     .catch(fail("cannot connect to database"))
   const result1 = await client.query(`CREATE TABLE IF NOT EXISTS ${TABLE_PREFIX}votes (` +

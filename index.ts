@@ -13,6 +13,7 @@ const Handlebars = require("handlebars")
 const db = require("./database")
 
 const VOTING_NAME = process.env["VOTING_NAME"]
+const VOTING_NAME_CAPITALIZED = VOTING_NAME ? (VOTING_NAME[0].toUpperCase() + VOTING_NAME.substr(1)) : ""
 const COOKIE_NAME = VOTING_NAME ? `hasvoted-${VOTING_NAME}` : "hasvoted"
 
 db.connect().then(db.initialize).then(() => {
@@ -30,7 +31,7 @@ app.use(async (ctx, next) => {
     await next();
   } catch (err) {
     const data = {
-      votingname: VOTING_NAME ? (VOTING_NAME[0].toUpperCase() + VOTING_NAME.substr(1)) : "",
+      votingname: VOTING_NAME_CAPITALIZED,
       message: err.message,
       tryagain: err.tryagain
     }
@@ -41,7 +42,7 @@ app.use(async (ctx, next) => {
 app.use(async ctx => {
   if(ctx.url == "/vote") {
     let data = {
-      votingname: VOTING_NAME ? (VOTING_NAME[0].toUpperCase() + VOTING_NAME.substr(1)) : "",
+      votingname: VOTING_NAME_CAPITALIZED,
       options: await db.getVotes()
     }
     ctx.body = await Handlebars.compile(fs.readFileSync(__dirname + "/vote.html").toString())(data)
@@ -111,7 +112,7 @@ app.use(async ctx => {
   } else if(ctx.url == "/results") {
     let [nvoters, options] = await Promise.all([db.getAmountOfVoters(), db.getSortedVotes()])
     let data = {
-      votingname: VOTING_NAME ? (VOTING_NAME[0].toUpperCase() + VOTING_NAME.substr(1)) : "",
+      votingname: VOTING_NAME_CAPITALIZED,
       nvoters,
       options
     }

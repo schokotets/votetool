@@ -8,11 +8,12 @@ app.proxy = true
 app.use(require("koa-static")("./static", { maxage: 86400000 /*1 day*/ }))
 app.use(require("multy")({}))
 
-const Mustache = require("mustache")
+const Handlebars = require("handlebars")
 
 const db = require("./database")
 
-const COOKIE_NAME = process.env["VOTING_NAME"] ? `hasvoted-${process.env["VOTING_NAME"]}` || "hasvoted"
+const VOTING_NAME = process.env["VOTING_NAME"]
+const COOKIE_NAME = VOTING_NAME ? `hasvoted-${VOTING_NAME}` : "hasvoted"
 
 db.connect().then(db.initialize).then(() => {
   app.listen(8083)
@@ -21,8 +22,11 @@ db.connect().then(db.initialize).then(() => {
 
 app.use(async ctx => {
   if(ctx.url == "/vote") {
-    let data = {options: await db.getVotes()}
-    ctx.body = await Mustache.render(fs.readFileSync(__dirname + "/vote.html").toString(), data)
+    let data = {
+      votingname: VOTING_NAME ? (VOTING_NAME[0].toUpperCase() + VOTING_NAME.substr(1)) : "",
+      options: await db.getVotes()
+    }
+    ctx.body = await Handlebars.compile(fs.readFileSync(__dirname + "/vote.html").toString())(data)
 
   } else if(ctx.url == "/submit") {
     if (ctx.cookies.get(COOKIE_NAME)) {
@@ -82,8 +86,12 @@ app.use(async ctx => {
 
   } else if(ctx.url == "/results") {
     let [nvotes, options] = await Promise.all([db.getAmountOfVoters(), db.getSortedVotes()])
-    let data = {nvoters: nvotes==1?"Eine Person hat":nvotes+" Personen haben", options}
-    ctx.body = await Mustache.render(fs.readFileSync(__dirname + "/results.html").toString(), data)
+    let data = {
+      votingname: VOTING_NAME ? (VOTING_NAME[0].toUpperCase() + VOTING_NAME.substr(1)) : "",
+      nvoters: nvotes==1?"Eine Person hat":nvotes+" Personen haben",
+      options
+    }
+    ctx.body = await Handlebars.compile(fs.readFileSync(__dirname + "/results.html").toString())(data)
 
   } else if(ctx.url == "/") {
     ctx.status = 303

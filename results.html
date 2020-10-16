@@ -2,12 +2,12 @@
 <html lang="de">
 <head>
 	<meta charset="UTF-8">
-	<title>Ergebnisse - Abimotto-Abstimmung</title>
+	<title>Ergebnisse - {{#if votingname}}{{votingname}}-{{/if}}Abstimmung</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="style.css" media="all">
 </head>
 <body>
-	<h1>Abimotto-Abstimmung</h1>
+	<h1>Abstimmung{{#if votingname}}: {{votingname}}{{/if}}</h1>
 	<h2>Ergebnisse</h2>
 
 	<a href="/vote">Zum Abstimmen</a>

@@ -2,7 +2,10 @@
   "name": "votetool",
   "version": "0.1.0",
   "description": "a webapp to cast multiple-choice votes with ip- and cookie-based duplication",
-  "main": "index.ts",
+  "main": "src/index.ts",
+  "scripts": {
+    "run": "ts-node src/index.ts"
+  },
   "repository": "https://github.com/schokotets/votetool.git",
   "author": "schokotets <moritzleni@gmail.com>",
   "license": "MIT",

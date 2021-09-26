@@ -68,16 +68,18 @@ function checkDateRange(ctx) {
   let rangeinfo = outOfDateRange()
   if(rangeinfo === 1) { //to not confuse with true
     ctx.throw(403, `Abstimmung wieder geschlossen`, {tryagain: false})
+    return false
   }
   if(rangeinfo == -1) {
     ctx.throw(403, `Abstimmung noch geschlossen.<br>Sie öffnet am ${dayjs(DATE_MIN).format(DATE_FORMAT)}.`, {tryagain: false})
+    return false
   }
   return true
 }
 
 app.use(async ctx => {
   if(ctx.url == "/vote") {
-    checkDateRange(ctx)
+    if (!checkDateRange(ctx)) return
 
     let data = {
       datemax: DATE_MAX ? dayjs(DATE_MAX).format(DATE_FORMAT) : undefined,
@@ -87,7 +89,7 @@ app.use(async ctx => {
     ctx.body = await Handlebars.compile(fs.readFileSync(templatedir + "/vote.html").toString())(data)
 
   } else if(ctx.url == "/submit") {
-    checkDateRange(ctx)
+    if (!checkDateRange(ctx)) return
 
     if (ctx.cookies.get(COOKIE_NAME)) {
       console.log(`${new Date().toISOString()}: error: already voted (cookie)`)

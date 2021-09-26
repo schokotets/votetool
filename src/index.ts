@@ -5,7 +5,10 @@ const Koa = require("koa")
 const app = new Koa()
 app.proxy = true
 
-app.use(require("koa-static")("./static", { maxage: 86400000 /*1 day*/ }))
+const templatedir = __dirname + "/../templates"
+const staticdir = __dirname + "/../static"
+
+app.use(require("koa-static")(staticdir, { maxage: 86400000 /*1 day*/ }))
 app.use(require("multy")({}))
 
 const Handlebars = require("handlebars")
@@ -39,7 +42,7 @@ app.use(async (ctx, next) => {
       message: err.message,
       tryagain: err.tryagain
     }
-    ctx.body = await Handlebars.compile(fs.readFileSync(__dirname + "/error.html").toString())(data)
+    ctx.body = await Handlebars.compile(fs.readFileSync(templatedir + "/error.html").toString())(data)
   }
 })
 
@@ -81,7 +84,7 @@ app.use(async ctx => {
       votingname: VOTING_NAME_CAPITALIZED,
       options: await db.getVotes()
     }
-    ctx.body = await Handlebars.compile(fs.readFileSync(__dirname + "/vote.html").toString())(data)
+    ctx.body = await Handlebars.compile(fs.readFileSync(templatedir + "/vote.html").toString())(data)
 
   } else if(ctx.url == "/submit") {
     checkDateRange(ctx)
@@ -158,7 +161,7 @@ app.use(async ctx => {
       nvoters,
       options
     }
-    ctx.body = await Handlebars.compile(fs.readFileSync(__dirname + "/results.html").toString())(data)
+    ctx.body = await Handlebars.compile(fs.readFileSync(templatedir + "/results.html").toString())(data)
 
   } else if(ctx.url == "/") {
     ctx.status = 303

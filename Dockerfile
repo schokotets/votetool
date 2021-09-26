@@ -21,8 +21,10 @@ RUN chmod +w yarn.lock
 USER node
 RUN yarn
 
-COPY static ./static
-COPY *.ts *.html *.css ./
-RUN yarn run tsc *.ts
+COPY --chown=node:node static ./static
+COPY --chown=node:node data ./data
+COPY --chown=node:node templates ./templates
+COPY --chown=node:node src ./src
+RUN yarn run tsc src/*.ts
 
-CMD ./wait-for-command.sh -c "nc -z $DB_HOST $DB_PORT" && node index.js
+CMD ./wait-for-command.sh -c "nc -z $DB_HOST $DB_PORT" && node src/index.js

@@ -1,34 +1,40 @@
 <!DOCTYPE html>
 <html lang="de">
-<head>
-	<meta charset="UTF-8">
-	<title>Abstimmen - {{#if votingname}}{{votingname}}-{{/if}}Abstimmung</title>
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="stylesheet" href="style.css" media="all">
-</head>
-<body>
-	<h1>Abstimmung{{#if votingname}}: {{votingname}}{{/if}}</h1>
-	<h2>Abstimmen</h2>
+  <head>
+    <meta charset="UTF-8" />
+    <title>
+      Abstimmen - {{#if votingname}}{{votingname}}-{{/if}}Abstimmung
+    </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="style.css" media="all" />
+  </head>
+  <body>
+    <h1>Abstimmung{{#if votingname}}: {{votingname}}{{/if}}</h1>
+    <h2>Abstimmen</h2>
 
-	{{#if datemax}}
-	<p>Die Abstimmung ist geöffnet bis {{datemax}}.</p>
-	{{/if}}
+    {{#if datemax}}
+    <p>Die Abstimmung ist geöffnet bis {{datemax}}.</p>
+    {{/if}}
 
-	<a href="/results">Zu den Ergebnissen</a>
-	<p>Maximal 5 auswählbar</p>
+    <a href="/results">Zu den Ergebnissen</a>
+    <p>Maximal 5 auswählbar</p>
 
-	<form enctype="multipart/form-data" method="post" action="/submit">
-		{{#options}}
-		<input name="{{id}}" id="checkbox-{{id}}" type="checkbox">
-		<label for="checkbox-{{id}}">{{name}}</label>
-		<br>
-		{{/options}}
-		<br>
-		<input name="consent" id="checkbox-consent" type="checkbox" required>
-		<label for="checkbox-consent">Ich erlaube, dass, um Mehrfachantworten zu vermeiden, meine IP-Adresse gespeichert wird und dass beim Absenden ein Cookie in meinem Browser angelegt wird.</label>
-		<br>
-		<br>
-		<input type="submit" value="Einsenden">
-	</form>
-</body>
+    <form enctype="multipart/form-data" method="post" action="/submit">
+      {{#options}}
+      <input name="{{id}}" id="checkbox-{{id}}" type="checkbox" />
+      <label for="checkbox-{{id}}">{{name}}</label>
+      <br />
+      {{/options}}
+      <br />
+      <input name="consent" id="checkbox-consent" type="checkbox" required />
+      <label for="checkbox-consent"
+        >Ich erlaube, dass, um Mehrfachantworten zu vermeiden, meine IP-Adresse
+        gespeichert wird und dass beim Absenden ein Cookie in meinem Browser
+        angelegt wird.</label
+      >
+      <br />
+      <br />
+      <input type="submit" value="Einsenden" />
+    </form>
+  </body>
 </html>

@@ -2,7 +2,9 @@ body {
   margin: 0.5em 1.5em;
 }
 
-input[type=checkbox], input[type=checkbox] + label, input[type=submit] {
+input[type="checkbox"],
+input[type="checkbox"] + label,
+input[type="submit"] {
   margin: 0.5em 0;
   cursor: pointer;
 }
@@ -12,10 +14,12 @@ table {
   margin-top: 1em;
 }
 
-table td, table th {
+table td,
+table th {
   border: 1px solid;
 }
 
-table tr:nth-child(2n), table th {
+table tr:nth-child(2n),
+table th {
   background-color: #ddd;
 }

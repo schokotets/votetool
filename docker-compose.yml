@@ -28,6 +28,8 @@ services:
     environment:
       - POSTGRES_DB=votetool
       - POSTGRES_PASSWORD=123password
+    volumes:
+      - ./db-data:/var/lib/postgresql/data
 
 networks:
   overlay:

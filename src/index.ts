@@ -60,26 +60,29 @@ Handlebars.registerHelper("newlinetobr", function (opt) {
   return opt.fn(this).replaceAll("\n", "<br><br>")
 })
 
-let users = [{ name: "username", pass: "password" }]
+let users = [{ name: "username", pass: "password", admin: false }]
 
 function basicAuth(ctx) {
   let login = auth(ctx)
-  if (
-    !login ||
-    !users.some((user) => user.name == login.name && user.pass == login.pass)
-  ) {
+  let user = users.find(
+    (user) => user.name == login.name && user.pass == login.pass
+  )
+  if (!login || !user) {
     ctx.throw(401, null, {
       headers: {
         "WWW-Authenticate": `Basic realm="vote-${VOTING_NAME}"`,
       },
     })
   }
-  return login.name
+  return {
+    username: login.name,
+    isAdmin: user.admin || false,
+  }
 }
 
 async function checkVotedAlready(ctx, username: string) {
   if (await db.hasVoted(username)) {
-    console.log(`${new Date().toISOString()}: error: already voted (ip)`)
+    console.log(`${new Date().toISOString()}: error: already voted`)
     ctx.throw(401, "Bereits abgestimmt", { tryagain: false })
     return false
   }
@@ -97,6 +100,10 @@ app.use(async (ctx, next) => {
       votingname: VOTING_NAME_CAPITALIZED,
       message: err.message,
       tryagain: err.tryagain,
+    }
+    // to only throw non-http errors
+    if (!err.status) {
+      console.log(err)
     }
     ctx.body = await Handlebars.compile(
       fs.readFileSync(templatedir + "/error.html").toString()
@@ -146,7 +153,7 @@ app.use(async (ctx) => {
   if (ctx.url == "/vote") {
     if (!checkDateRange(ctx)) return
 
-    let username = basicAuth(ctx)
+    let { username } = basicAuth(ctx)
     if (!(await checkVotedAlready(ctx, username))) return
 
     let shuffledProjects = [...options.projects].sort(() => Math.random() - 0.5)
@@ -162,7 +169,7 @@ app.use(async (ctx) => {
   } else if (ctx.url == "/submit") {
     if (!checkDateRange(ctx)) return
 
-    let username = basicAuth(ctx)
+    let { username } = basicAuth(ctx)
     if (!(await checkVotedAlready(ctx, username))) return
 
     const formdata = ctx.request.body
@@ -240,6 +247,8 @@ app.use(async (ctx) => {
       ctx.throw(400, "Keine Formulardaten"), { tryagain: true }
     }
   } else if (ctx.url == "/results") {
+    let { isAdmin } = basicAuth(ctx)
+
     let [nvoters, votes] = await Promise.all([
       db.getAmountOfVoters(),
       db.getVotes(),
@@ -254,6 +263,7 @@ app.use(async (ctx) => {
       nvoters,
       votes,
       options,
+      isAdmin,
     }
     ctx.body = await Handlebars.compile(
       fs.readFileSync(templatedir + "/results.html").toString()

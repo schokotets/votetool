@@ -10,11 +10,10 @@
   </head>
   <body>
     <h1>Abstimmung{{#if votingname}}: {{votingname}}{{/if}}</h1>
+    <p><a href="/vote">Zum Abstimmen</a></p>
     <h2>Ergebnisse</h2>
 
-    {{#if canvote}}
-    <a href="/vote">Zum Abstimmen</a>
-    {{/if}} {{#if datemin}} {{#if datemax}}
+    {{#if canvote}} {{/if}} {{#if datemin}} {{#if datemax}}
     <p>
       Abstimmen {{#unless votingover}} ist {{else}} war {{/unless}}möglich vom
       {{datemin}} bis zum {{datemax}}.
@@ -33,8 +32,7 @@
     <p>Eine Person hat abgestimmt.</p>
     {{else}}
     <p>{{nvoters}} Personen haben abgestimmt.</p>
-    {{/ifeq}}
-
+    {{/ifeq}} {{#if isAdmin}}
     <table>
       <thead>
         <th>Option</th>
@@ -53,5 +51,6 @@
         {{/options.projects}}
       </tbody>
     </table>
+    {{/if}}
   </body>
 </html>

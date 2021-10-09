@@ -38,15 +38,19 @@
     <table>
       <thead>
         <th>Option</th>
-        <th>Stimmen</th>
+        <th>Code</th>
+        <th colspan="{{votes.length}}">Stimmen</th>
       </thead>
       <tbody>
-        {{#options}}
+        {{#options.projects as |option|}}
         <tr>
           <td>{{name}}</td>
-          <td>{{votes}}</td>
+          <td>{{option.code}}</td>
+          {{#each ../votes as |vote|}} {{#each vote}} {{#ifeq option.code @key}}
+          <td>{{this}}</td>
+          {{/ifeq}} {{/each}} {{/each}}
         </tr>
-        {{/options}}
+        {{/options.projects}}
       </tbody>
     </table>
   </body>

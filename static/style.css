@@ -23,3 +23,175 @@ table tr:nth-child(2n),
 table th {
   background-color: #ddd;
 }
+
+#popup {
+  display: none;
+  position: fixed;
+  /* padding: 20px; */
+  box-sizing: border-box;
+  width: 90vw;
+  max-width: 80em;
+  /* height: 90vh; */
+  /* top: 50%; */
+  /* margin-top: -45vh; */
+  top: 0;
+  margin-top: 1.33em;
+  margin-left: auto;
+  margin-right: auto;
+  background: #fff;
+  z-index: 20;
+}
+
+#popup-text {
+  margin-bottom: 0;
+}
+
+#popup-inner {
+  margin: 20px;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+#popup-inner2 {
+  margin: 20px;
+}
+
+#popup-inner h2 {
+  margin-top: 0;
+}
+
+#popup:after {
+  position: fixed;
+  content: "";
+  top: -100px;
+  left: 0;
+  bottom: -100px;
+  right: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: -2;
+}
+
+#popup:before {
+  position: absolute;
+  content: "";
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: #fff;
+  z-index: -1;
+}
+
+#popup-ok {
+  width: 100%;
+  padding: 0.2em;
+}
+
+p {
+  line-height: 1.4;
+}
+
+.noscroll {
+  overflow: hidden;
+}
+
+.item {
+  background: white;
+  padding: 0.5em;
+  margin: 1em 0;
+  border: 1px solid black;
+}
+
+.item .flexrow {
+  display: flex;
+  flex-direction: row;
+}
+
+.item .flexcolumn {
+  display: flex;
+  flex-direction: column;
+}
+
+.item .category {
+  font-style: italic;
+  opacity: 0.7;
+}
+
+.flex1 {
+  flex: 1;
+}
+
+.pad {
+  margin: 0 0.4em;
+}
+
+.pad-right {
+  margin-right: 0.4em;
+}
+
+.infobtn {
+  font-size: 2em;
+  height: 2rem;
+  width: 2rem;
+  border: 1px solid black;
+  border-radius: 1rem;
+  display: block;
+  vertical-align: middle;
+  text-align: center;
+  text-decoration: none;
+  color: unset;
+  font-family: monospace;
+}
+
+.movebtn {
+  border: 1px solid gray;
+  padding: 0.1em 0.2em;
+  width: 1em;
+  text-align: center;
+  cursor: pointer;
+}
+
+.item:first-child .movebtn:first-child {
+  display: none;
+}
+
+.item:last-child .movebtn:last-child {
+  display: none;
+}
+
+.item {
+  animation-duration: 0.4s;
+  animation-fill-mode: forwards; /* Makes it stay after animation */
+  animation-timing-function: ease-out;
+}
+
+.moveUp {
+  transform: translateY(100%);
+  display: block;
+  visibility: visible;
+  animation-name: doAnimStay;
+}
+.moveDown {
+  transform: translateY(-100%);
+  display: block;
+  visibility: visible;
+  animation-name: doAnimStay;
+}
+
+@-webkit-keyframes doAnimStay {
+  0% {
+    opacity: 0.5;
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0%);
+  }
+}
+
+.above {
+  z-index: 10;
+  position: relative;
+}

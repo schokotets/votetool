@@ -81,9 +81,12 @@ export async function castVotes(
     .catch(fail("cannot connect to database"))
   const result = await client
     .query(
-      `INSERT INTO ${TABLE_PREFIX}votes (name, ${Object.keys(votes).join(
-        ","
-      )}) VALUES ('${username}', ${Object.values(votes).join(",")});`
+      `INSERT INTO ${TABLE_PREFIX}votes` +
+        "(name, votetime," +
+        Object.keys(votes).join(",") +
+        `) VALUES ('${username}', now(), ` +
+        Object.values(votes).join(",") +
+        ");"
     )
     .then(() => true, fail("cannot register votes", false))
   client.release()

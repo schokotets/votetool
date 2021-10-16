@@ -60,7 +60,13 @@ Handlebars.registerHelper("newlinetobr", function (opt) {
   return opt.fn(this).replaceAll("\n", "<br><br>")
 })
 
-let users = [{ name: "username", pass: "password", admin: false }]
+interface User {
+  name: string
+  pass: string
+  admin?: boolean
+}
+
+let users: User[] = JSON.parse(fs.readFileSync(datadir + "/users.json"))
 
 function basicAuth(ctx) {
   let login = auth(ctx)

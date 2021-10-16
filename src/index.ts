@@ -77,7 +77,7 @@ function basicAuth(ctx) {
         "WWW-Authenticate": `Basic realm="vote-${VOTING_NAME}"`,
       },
     })
-    return {loginStatus: false}
+    return { loginStatus: false }
   }
 
   let user = users.find(
@@ -90,13 +90,13 @@ function basicAuth(ctx) {
         "WWW-Authenticate": `Basic realm="vote-${VOTING_NAME}"`,
       },
     })
-    return {loginStatus: false}
+    return { loginStatus: false }
   }
 
   return {
     username: login.name,
     isAdmin: user.admin || false,
-    loginStatus: true
+    loginStatus: true,
   }
 }
 

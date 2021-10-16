@@ -27,4 +27,4 @@ COPY --chown=node:node templates ./templates
 COPY --chown=node:node src ./src
 RUN yarn run tsc src/*.ts
 
-CMD ./wait-for-command.sh -c "nc -z $DB_HOST $DB_PORT" && node src/index.js
+CMD ./wait-for-command.sh -t 60 -c "nc -z $DB_HOST $DB_PORT" && node src/index.js

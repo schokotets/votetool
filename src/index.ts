@@ -70,19 +70,33 @@ let users: User[] = JSON.parse(fs.readFileSync(datadir + "/users.json"))
 
 function basicAuth(ctx) {
   let login = auth(ctx)
-  let user = users.find(
-    (user) => user.name == login.name && user.pass == login.pass
-  )
-  if (!login || !user) {
+
+  if (!login || !login.name || !login.pass) {
     ctx.throw(401, null, {
       headers: {
         "WWW-Authenticate": `Basic realm="vote-${VOTING_NAME}"`,
       },
     })
+    return {loginStatus: false}
   }
+
+  let user = users.find(
+    (user) => user.name == login.name && user.pass == login.pass
+  )
+
+  if (!user) {
+    ctx.throw(401, null, {
+      headers: {
+        "WWW-Authenticate": `Basic realm="vote-${VOTING_NAME}"`,
+      },
+    })
+    return {loginStatus: false}
+  }
+
   return {
     username: login.name,
     isAdmin: user.admin || false,
+    loginStatus: true
   }
 }
 
@@ -159,7 +173,8 @@ app.use(async (ctx) => {
   if (ctx.url == "/vote") {
     if (!checkDateRange(ctx)) return
 
-    let { username } = basicAuth(ctx)
+    let { username, loginStatus } = basicAuth(ctx)
+    if (!loginStatus) return
     if (!(await checkVotedAlready(ctx, username))) return
 
     let shuffledProjects = [...options.projects].sort(() => Math.random() - 0.5)
@@ -175,7 +190,8 @@ app.use(async (ctx) => {
   } else if (ctx.url == "/submit") {
     if (!checkDateRange(ctx)) return
 
-    let { username } = basicAuth(ctx)
+    let { username, loginStatus } = basicAuth(ctx)
+    if (!loginStatus) return
     if (!(await checkVotedAlready(ctx, username))) return
 
     const formdata = ctx.request.body
@@ -253,7 +269,8 @@ app.use(async (ctx) => {
       ctx.throw(400, "Keine Formulardaten"), { tryagain: true }
     }
   } else if (ctx.url == "/results") {
-    let { isAdmin } = basicAuth(ctx)
+    let { isAdmin, loginStatus } = basicAuth(ctx)
+    if (!loginStatus) return
 
     let [nvoters, votes] = await Promise.all([
       db.getAmountOfVoters(),

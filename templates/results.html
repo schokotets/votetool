@@ -35,6 +35,7 @@
     {{/ifeq}} {{#if isAdmin}}
     <table>
       <thead>
+        <th>aktuell</th>
         <th>Option</th>
         <th>Code</th>
         <th colspan="{{votes.length}}">Stimmen</th>
@@ -42,6 +43,9 @@
       <tbody>
         {{#options.projects as |option|}}
         <tr>
+          {{#each ../vote_results as |vote|}} {{#ifeq option.code @key}}
+          <td align="right">{{this}}</td>
+          {{/ifeq}} {{/each}}
           <td>{{name}}</td>
           <td>{{option.code}}</td>
           {{#each ../votes as |vote|}} {{#each vote}} {{#ifeq option.code @key}}

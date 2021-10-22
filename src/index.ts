@@ -291,6 +291,35 @@ app.use(async (ctx) => {
       db.getVotes(),
     ])
 
+    let vote_results = votes
+      //divide each row by its sum
+      .map((v) => {
+        let sum = options.projects
+          .map((p) => v[p.code])
+          .reduce((c, t) => c + t, 0)
+        return options.projects.reduce((t, p) => {
+          t[p.code] = v[p.code] / sum
+          return t
+        }, {})
+      })
+      //sum all the rows
+      .reduce((t, c) => {
+        options.projects.forEach((p) => {
+          if (p.code in t) {
+            t[p.code] += c[p.code]
+          } else {
+            t[p.code] = c[p.code]
+          }
+        })
+        return t
+      }, {})
+
+    //properly divide & format the results
+    options.projects.forEach((p) => {
+      let r = vote_results[p.code] / votes.length
+      vote_results[p.code] = (r * 100).toFixed(3) + "%"
+    })
+
     let data = {
       votingname: VOTING_NAME_CAPITALIZED,
       canvote: !outOfDateRange(),
@@ -301,6 +330,7 @@ app.use(async (ctx) => {
       votes,
       options,
       isAdmin,
+      vote_results,
     }
     ctx.body = await Handlebars.compile(
       fs.readFileSync(templatedir + "/results.html").toString()

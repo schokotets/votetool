@@ -1,4 +1,4 @@
-/* global prioritized */
+/* global parts */
 
 function assert(statement, message) {
   if (!statement) {
@@ -6,101 +6,77 @@ function assert(statement, message) {
   }
 }
 
-function storePositioning() {
-  for (let index in prioritized) {
-    let rank = 1 + parseInt(index)
-    let code = prioritized[index]
-    let input = document.getElementById("rank-" + code)
-    if (input) {
-      input.value = rank
-    }
+function saveValues() {
+  for (let code in parts) {
+    document.getElementById("parts-" + code).value = parts[code]
   }
 }
 
-function moveUp(code) {
-  assert(prioritized[0] != code, code + " is already at the very top")
+function increment(code) {
+  let sum = 0
+  for (v of Object.values(parts)) {
+    sum += v
+  }
+  if (sum == 20) {
+    return
+  }
 
-  let index = -1
-  for (let i = 1; i < prioritized.length; i++) {
-    if (prioritized[i] == code) {
-      index = i
-      break
+  parts[code]++
+  document.getElementById("score-" + code).innerText = parts[code]
+  document.getElementById("minusbtn-" + code).classList.remove("disabled")
+
+  sum += 1
+  document.getElementById("submitbtn").removeAttribute("disabled")
+
+  for (let sumElement of document.getElementsByClassName("sum")) {
+    sumElement.innerText = sum
+  }
+
+  if (sum == 20) {
+    for (let plusBtn of document.getElementsByClassName("plusbtn")) {
+      plusBtn.classList.add("disabled")
     }
   }
 
-  assert(index != -1, "couldn't find " + code + " to move up")
-  assert(index != 0)
-
-  let currentElement = document.getElementById("item-" + code)
-  assert(currentElement, "element with id item-" + code + " doesn't exist")
-
-  let beforeCode = prioritized[index - 1]
-  let beforeElement = document.getElementById("item-" + beforeCode)
-  assert(beforeElement, "element with id item-" + beforeCode + " doesn't exist")
-
-  currentElement.classList.remove("moveDown")
-  currentElement.classList.remove("moveUp")
-  beforeElement.classList.remove("moveDown")
-  beforeElement.classList.remove("moveUp")
-
-  beforeElement.classList.remove("above")
-  currentElement.classList.add("above")
-
-  beforeElement.parentNode.removeChild(beforeElement)
-  beforeElement.classList.add("moveDown")
-  currentElement.parentNode.insertBefore(beforeElement, currentElement)
-
-  currentElement.parentNode.removeChild(currentElement)
-  currentElement.classList.add("moveUp")
-  beforeElement.parentNode.insertBefore(currentElement, beforeElement)
-
-  prioritized[index] = beforeCode
-  prioritized[index - 1] = code
-
-  storePositioning()
+  saveValues()
 }
 
-function moveDown(code) {
-  assert(
-    prioritized[prioritized.length - 1] != code,
-    code + " is already at the very bottom"
-  )
-
-  let index = -1
-  for (let i = prioritized.length - 2; i >= 0; i--) {
-    if (prioritized[i] == code) {
-      index = i
-      break
-    }
+function decrement(code) {
+  let sum = 0
+  for (v of Object.values(parts)) {
+    sum += v
+  }
+  if (sum == 0) {
+    return
+  }
+  if (parts[code] == 0) {
+    return
   }
 
-  assert(index != -1, "couldn't find " + code + " to move down")
-  assert(index != prioritized.length - 1)
+  parts[code]--
+  document.getElementById("score-" + code).innerText = parts[code]
+  document.getElementById("plusbtn-" + code).classList.remove("disabled")
 
-  let currentElement = document.getElementById("item-" + code)
-  assert(currentElement, "element with id item-" + code + " doesn't exist")
+  sum -= 1
 
-  let afterCode = prioritized[index + 1]
-  let afterElement = document.getElementById("item-" + afterCode)
-  assert(afterElement, "element with id item-" + afterCode + " doesn't exist")
+  for (let sumElement of document.getElementsByClassName("sum")) {
+    sumElement.innerText = sum
+  }
 
-  currentElement.classList.remove("moveDown")
-  currentElement.classList.remove("moveUp")
-  afterElement.classList.remove("moveDown")
-  afterElement.classList.remove("moveUp")
+  if (sum == 0) {
+    for (let minusBtn of document.getElementsByClassName("minusbtn")) {
+      minusBtn.classList.add("disabled")
+    }
+    document.getElementById("submitbtn").setAttribute("disabled", true)
+  }
 
-  afterElement.classList.remove("above")
-  currentElement.classList.add("above")
+  if (parts[code] == 0) {
+    document.getElementById("minusbtn-" + code).classList.add("disabled")
+  }
 
-  currentElement.parentNode.removeChild(currentElement)
-  currentElement.classList.add("moveDown")
-  afterElement.parentNode.insertBefore(currentElement, afterElement.nextSibling)
-  afterElement.parentNode.removeChild(afterElement)
-  afterElement.classList.add("moveUp")
-  currentElement.parentNode.insertBefore(afterElement, currentElement)
+  for (let plusBtn of document.getElementsByClassName("plusbtn")) {
+    plusBtn.classList.remove("disabled")
+  }
 
-  prioritized[index] = afterCode
-  prioritized[index + 1] = code
-
-  storePositioning()
+  saveValues()
 }

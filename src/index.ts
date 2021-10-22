@@ -25,6 +25,7 @@ interface Project {
   category: string
   link: string
   description: string
+  selected?: boolean
 }
 
 interface Options {
@@ -33,12 +34,15 @@ interface Options {
 }
 
 const options: Options = JSON.parse(fs.readFileSync(datadir + "/options.json"))
+options.projects = options.projects.filter((p) => p.selected)
 const codes = options.projects.map((p) => p.code)
 
 const VOTING_NAME = process.env["VOTING_NAME"]
 const VOTING_NAME_CAPITALIZED = VOTING_NAME
   ? VOTING_NAME[0].toUpperCase() + VOTING_NAME.substr(1)
   : ""
+
+const MAX_VOTES = 20
 
 const db = require("./database")
 
@@ -206,13 +210,13 @@ app.use(async (ctx) => {
       Object.keys(formdata).forEach((fieldkey) => {
         if (fieldkey != "consent") {
           let value = parseInt(formdata[fieldkey])
-          if (!value) {
+          if (value == null) {
             ctx.throw(400, `Fehlender Wert bei key ${fieldkey}`, {
               tryagain: true,
             })
             return
           }
-          if (value < 1 || value > codes.length) {
+          if (value < 0 || value > MAX_VOTES) {
             ctx.throw(400, `Ungültiger Wert bei key ${fieldkey}: ${value}`, {
               tryagain: true,
             })
@@ -223,21 +227,31 @@ app.use(async (ctx) => {
       })
 
       let amount = Object.keys(votes).length
-      if (amount == 0) {
-        console.log(`${new Date().toISOString()}: error: no options selected`)
-        ctx.throw(400, "Gar keine Optionen ausgewählt", { tryagain: true })
-        return
-      }
       if (amount != codes.length) {
         console.log(
           `${new Date().toISOString()}: error: wrong amount of rankings`
         )
         ctx.throw(
           400,
-          `Falsche Anzahl von Ranks: ${amount} statt ${codes.length} erlaubte`,
+          `Falsche Anzahl von Codes: ${amount} statt ${codes.length} erlaubte`,
           { tryagain: true }
         )
         return
+      }
+
+      let sum = Object.values(votes).reduce((v, sum) => sum + v, 0)
+
+      if (sum > MAX_VOTES) {
+        console.log(
+          `${new Date().toISOString()}: error: sum of votes is too large`
+        )
+        ctx.throw(400, `Summe zu groß: ${sum} statt MAX_VOTES erlaubte`, {
+          tryagain: true,
+        })
+      }
+      if (sum == 0) {
+        console.log(`${new Date().toISOString()}: error: sum of votes is zero`)
+        ctx.throw(400, `Summe ist null`, { tryagain: true })
       }
 
       for (let code of codes) {

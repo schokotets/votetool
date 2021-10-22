@@ -38,12 +38,12 @@ export async function initialize(codes: string[]) {
     .catch(fail("cannot connect to database", true))
   const result1 = await client
     .query(
-      `CREATE TABLE IF NOT EXISTS ${TABLE_PREFIX}votes (` +
+      `CREATE TABLE IF NOT EXISTS ${TABLE_PREFIX}votes_2 (` +
         "name varchar PRIMARY KEY," +
         codes.map((code) => `${code} integer,`).join("") +
         "votetime timestamp);"
     )
-    .catch(fail(`cannot create ${TABLE_PREFIX}votes table`))
+    .catch(fail(`cannot create ${TABLE_PREFIX}votes_2 table`))
 }
 
 export async function getAmountOfVoters() {
@@ -51,7 +51,7 @@ export async function getAmountOfVoters() {
     .connect()
     .catch(fail("cannot connect to database"))
   const result = await client
-    .query(`SELECT COUNT(*) FROM ${TABLE_PREFIX}votes;`)
+    .query(`SELECT COUNT(*) FROM ${TABLE_PREFIX}votes_2;`)
     .catch(fail("cannot select votes"))
   if (!result) return null
   let res = result.rows[0].count
@@ -64,7 +64,7 @@ export async function getVotes() {
     .connect()
     .catch(fail("cannot connect to database"))
   const result = await client
-    .query(`SELECT * FROM ${TABLE_PREFIX}votes;`)
+    .query(`SELECT * FROM ${TABLE_PREFIX}votes_2;`)
     .catch(fail("cannot select votes"))
   if (!result) return null
   let res = result.rows
@@ -81,7 +81,7 @@ export async function castVotes(
     .catch(fail("cannot connect to database"))
   const result = await client
     .query(
-      `INSERT INTO ${TABLE_PREFIX}votes` +
+      `INSERT INTO ${TABLE_PREFIX}votes_2` +
         "(name, votetime," +
         Object.keys(votes).join(",") +
         `) VALUES ('${username}', now(), ` +
@@ -98,7 +98,9 @@ export async function hasVoted(username: string): Promise<boolean> {
     .connect()
     .catch(fail("cannot connect to database"))
   const result = await client
-    .query(`SELECT name FROM ${TABLE_PREFIX}votes WHERE name = '${username}';`)
+    .query(
+      `SELECT name FROM ${TABLE_PREFIX}votes_2 WHERE name = '${username}';`
+    )
     .catch(fail("cannot check if hash has voted", false))
   let res = result.rowCount > 0
   client.release()

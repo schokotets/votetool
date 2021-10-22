@@ -144,19 +144,28 @@ p {
 }
 
 .movebtn {
-  border: 1px solid gray;
   padding: 0.1em 0.2em;
   width: 1em;
   text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+.flexcolumn .movebtn:first-child {
+  border-bottom: 1px black solid;
+}
+.scorefrac {
+  padding: 0 0.2em;
+}
+.grayborder {
+  border: 1px solid gray;
   cursor: pointer;
 }
-
-.item:first-child .movebtn:first-child {
-  display: none;
-}
-
-.item:last-child .movebtn:last-child {
-  display: none;
+.disabled {
+  border-color: #ddd;
+  background: #ddd;
+  cursor: not-allowed;
 }
 
 .item {

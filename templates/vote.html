@@ -10,14 +10,14 @@
     <script type="text/javascript" src="popup.js"></script>
     <script type="text/javascript" src="vote-interactive.js"></script>
     <script type="text/javascript">
-      let prioritized = [];
+      let parts = {};
       {{#projects}}
-      prioritized.push("{{code}}");
+      parts["{{code}}"] = 0;
       {{/projects}}
-      console.log(prioritized);
+      console.log(parts);
     </script>
   </head>
-  <body onload="loadPopup();storePositioning();">
+  <body onload="loadPopup();">
     <div id="popup">
       <div id="popup-inner">
         <h2 id="popup-heading">ORGA-Name</h2>
@@ -37,27 +37,52 @@
     {{/if}}
 
     <p>
-      Nutze die Pfeile, um die Organisationen zu sortieren. Stelle dir dabei die
-      Frage: Welche Organisationen sollten lieber finanzielle Unterstützung von
-      uns erhalten?
+      Nun gilt es, zu ermitteln, welche Organisation wie viel vom Geld erhält.
+      Jede der <tt>n</tt> Personen, die hier abstimmt, verfügt über (übriges
+      Geld)/(<tt>n</tt>).
+    </p>
+    <p>
+      Du kannst wie folgt über die Verteilung deines Anteils des Geldes
+      verfügen: Stelle dir vor, dieser Anteil wäre ein Kuchen. Dann kannst du
+      hier entscheiden, in wie viele gleich große Teile du deinen Kuchen teilst,
+      und welche Organisation wie viele dieser Kuchenstücke erhält.
+    </p>
+    <p>
+      Nutze die Plus- und Minusknöpfe bei jeder Organisation, um zu bestimmen,
+      wie viele <q>Kuchenstücke</q> (Anteile deines Anteils) sie erhält. Du
+      kannst deinen <q>Kuchen</q> in maximal 20 Teile teilen. Bei jeder
+      Organisation steht der Anteil als gemeiner Bruch geschrieben.
     </p>
 
     <br />
     <form enctype="multipart/form-data" method="post" action="/submit">
-      <p><i>sollte von uns am meisten unterstützt werden</i></p>
       <div class="items">
         {{#projects}}
         <div class="item" id="item-{{code}}">
           <input
             style="display: none"
             name="{{code}}"
-            id="rank-{{code}}"
+            id="parts-{{code}}"
             type="text"
           />
           <div class="flexrow" style="align-items: center">
-            <div class="flexcolumn pad-right">
-              <span class="movebtn" onclick="moveUp('{{code}}')">/\</span>
-              <span class="movebtn" onclick="moveDown('{{code}}')">\/</span>
+            <div class="flexrow pad-right">
+              <span
+                class="movebtn grayborder plusbtn"
+                id="plusbtn-{{code}}"
+                onclick="increment('{{code}}')"
+                >+</span
+              >
+              <div class="flexcolumn scorefrac">
+                <span class="movebtn score" id="score-{{code}}">0</span>
+                <span class="movebtn sum">0</span>
+              </div>
+              <span
+                class="movebtn grayborder minusbtn disabled"
+                id="minusbtn-{{code}}"
+                onclick="decrement('{{code}}')"
+                >-</span
+              >
             </div>
             <div class="flexcolumn flex1">
               <span class="category">{{category}}</span>
@@ -75,7 +100,6 @@
         </div>
         {{/projects}}
       </div>
-      <p><i>sollte von uns am wenigsten unterstützt werden</i></p>
 
       <br />
       <input name="consent" id="checkbox-consent" type="checkbox" required />
@@ -86,7 +110,7 @@
       >
       <br />
       <br />
-      <input type="submit" value="Einsenden" />
+      <input id="submitbtn" type="submit" value="Einsenden" disabled />
     </form>
   </body>
 </html>
